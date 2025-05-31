@@ -23,7 +23,8 @@ export async function POST(request: NextRequest) {
     const basePrompt = `Generate a creative and fun memecoin concept. Create:
 1. A catchy name (2-4 words max)
 2. A symbol (3-5 letters, all caps)
-3. A fun description (MUST be 255 characters or less, including emojis)`;
+3. A fun description (MUST be 255 characters or less, including emojis)
+4. A visual description for the token image (this will be used in a Fal AI image generation prompt - describe what the image should look like, focusing on visual elements, colors, objects, composition. The image is for a memecoin but doesn't need to show actual coins or tokens - focus on the meme/theme itself)`;
 
     const standardConstraints = !theme ? `
 
@@ -42,12 +43,14 @@ The memecoin should be themed around: ${theme} (incorporate this theme creativel
     const prompt = `${basePrompt}${standardConstraints}${themePrompt}
 
 IMPORTANT: The description must be exactly 255 characters or fewer. Count carefully!
+IMPORTANT: The visual description will be used in a Fal AI prompt, so focus ONLY on what should be in the image (objects, colors, composition, mood) - do NOT include artistic style terms like "cartoon", "photorealistic", "oil painting", etc. The image represents the memecoin's theme/meme but doesn't need to show actual coins or tokens.
 
 Respond in this exact JSON format:
 {
   "name": "coin name here",
   "symbol": "SYMBOL",
-  "description": "fun description here (255 chars max)..."
+  "description": "fun description here (255 chars max)...",
+  "visualDescription": "detailed visual description for Fal AI image generation (no style information, focus on the meme/theme)..."
 }`;
 
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
@@ -95,7 +98,7 @@ Respond in this exact JSON format:
       const memecoinData = JSON.parse(content);
       
       // Validate the required fields
-      if (!memecoinData.name || !memecoinData.symbol || !memecoinData.description) {
+      if (!memecoinData.name || !memecoinData.symbol || !memecoinData.description || !memecoinData.visualDescription) {
         throw new Error('Invalid response format');
       }
 
@@ -107,12 +110,14 @@ Respond in this exact JSON format:
       const nameMatch = content.match(/"name":\s*"([^"]+)"/);
       const symbolMatch = content.match(/"symbol":\s*"([^"]+)"/);
       const descMatch = content.match(/"description":\s*"([^"]+)"/);
+      const visualDescMatch = content.match(/"visualDescription":\s*"([^"]+)"/);
 
-      if (nameMatch && symbolMatch && descMatch) {
+      if (nameMatch && symbolMatch && descMatch && visualDescMatch) {
         return NextResponse.json({
           name: nameMatch[1],
           symbol: symbolMatch[1],
           description: descMatch[1],
+          visualDescription: visualDescMatch[1],
         });
       }
 

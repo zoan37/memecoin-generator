@@ -7,6 +7,7 @@ interface MemecoinData {
   name: string;
   symbol: string;
   description: string;
+  visualDescription: string;
   imageUrl: string;
 }
 
@@ -19,6 +20,7 @@ export default function MemecoinGenerator() {
   const [theme, setTheme] = useState('');
   const [selectedModel, setSelectedModel] = useState('anthropic/claude-3.5-sonnet');
   const [imageStyle, setImageStyle] = useState('cartoon');
+  const [customStylePrompt, setCustomStylePrompt] = useState('');
 
   // Popular OpenRouter models for text generation
   const availableModels = [
@@ -31,6 +33,7 @@ export default function MemecoinGenerator() {
   const imageStyles = [
     { id: 'cartoon', name: 'Cartoon Mascot', description: 'Cute cartoon mascot style' },
     { id: 'photorealistic', name: 'Photorealistic', description: 'Realistic photography style' },
+    { id: 'custom', name: 'Custom Style', description: 'Define your own custom style prompt' },
   ];
 
   // Load saved settings from localStorage on component mount
@@ -39,6 +42,7 @@ export default function MemecoinGenerator() {
     const savedFalAiKey = localStorage.getItem('fal_ai_api_key');
     const savedModel = localStorage.getItem('selected_model');
     const savedImageStyle = localStorage.getItem('image_style');
+    const savedCustomStylePrompt = localStorage.getItem('custom_style_prompt');
     
     if (savedOpenRouterKey) {
       setOpenRouterKey(savedOpenRouterKey);
@@ -48,6 +52,9 @@ export default function MemecoinGenerator() {
     }
     if (savedImageStyle) {
       setImageStyle(savedImageStyle);
+    }
+    if (savedCustomStylePrompt) {
+      setCustomStylePrompt(savedCustomStylePrompt);
     }
     
     // Check if saved model is valid, if not reset to default
@@ -95,6 +102,16 @@ export default function MemecoinGenerator() {
     localStorage.setItem('image_style', newStyle);
   };
 
+  // Save custom style prompt to localStorage when it changes
+  const handleCustomStylePromptChange = (newPrompt: string) => {
+    setCustomStylePrompt(newPrompt);
+    if (newPrompt) {
+      localStorage.setItem('custom_style_prompt', newPrompt);
+    } else {
+      localStorage.removeItem('custom_style_prompt');
+    }
+  };
+
   const generateMemecoin = async () => {
     // Use environment variables as fallback if user hasn't provided keys
     const effectiveOpenRouterKey = openRouterKey || process.env.NEXT_PUBLIC_OPENROUTER_API_KEY;
@@ -102,6 +119,12 @@ export default function MemecoinGenerator() {
 
     if (!effectiveOpenRouterKey || !effectiveFalAiKey) {
       alert('API keys are required! Please set your keys in settings or contact the developer.');
+      return;
+    }
+
+    // Validate custom style prompt if custom style is selected
+    if (imageStyle === 'custom' && !customStylePrompt.trim()) {
+      alert('Please enter a custom style prompt or select a different image style.');
       return;
     }
 
@@ -127,6 +150,16 @@ export default function MemecoinGenerator() {
 
       const textData = await textResponse.json();
 
+      // Build image prompt based on selected style
+      let imagePrompt = '';
+      if (imageStyle === 'custom') {
+        imagePrompt = `${customStylePrompt} style. Visual content: ${textData.visualDescription}`;
+      } else if (imageStyle === 'cartoon') {
+        imagePrompt = `A cute cartoon mascot for ${textData.name} memecoin: ${textData.description}. Bright colors, fun design, crypto theme. Professional digital art, high quality, colorful, cartoon style, friendly mascot character, crypto currency theme, clean background, 1024x1024 resolution, perfect for a token logo`;
+      } else {
+        imagePrompt = `A photorealistic image for ${textData.name}. Visual content: ${textData.visualDescription}. Photorealistic, realistic photography, professional studio lighting, high-resolution photograph, detailed textures, real-world lighting, photographic style, ultra-realistic, studio quality, DSLR camera shot, realistic materials and surfaces, no cartoon elements, no digital art style, pure photography`;
+      }
+
       // Generate image using Fal AI
       const imageResponse = await fetch('/api/generate-image', {
         method: 'POST',
@@ -135,9 +168,7 @@ export default function MemecoinGenerator() {
         },
         body: JSON.stringify({
           falAiKey: effectiveFalAiKey,
-          prompt: imageStyle === 'cartoon' 
-            ? `A cute cartoon mascot for ${textData.name} memecoin: ${textData.description}. Bright colors, fun design, crypto theme. Professional digital art, high quality, colorful, cartoon style, friendly mascot character, crypto currency theme, clean background, 1024x1024 resolution, perfect for a token logo`
-            : `A photorealistic image for ${textData.name} memecoin: ${textData.description}. Photorealistic, realistic photography, professional studio lighting, high-resolution photograph, detailed textures, real-world lighting, photographic style, ultra-realistic, studio quality, DSLR camera shot, realistic materials and surfaces, no cartoon elements, no digital art style, pure photography`,
+          prompt: imagePrompt,
           usingDefaultKeys: !openRouterKey || !falAiKey
         }),
       });
@@ -152,6 +183,7 @@ export default function MemecoinGenerator() {
         name: textData.name,
         symbol: textData.symbol,
         description: textData.description,
+        visualDescription: textData.visualDescription,
         imageUrl: imageData.imageUrl,
       });
     } catch (error) {
@@ -372,6 +404,28 @@ export default function MemecoinGenerator() {
               <p className="text-sm text-gray-400 mt-2">
                 🎨 {imageStyles.find(s => s.id === imageStyle)?.description}
               </p>
+              
+              {/* Custom Style Prompt Input */}
+              {imageStyle === 'custom' && (
+                <div className="mt-4">
+                  <label className="block text-white text-sm font-medium mb-2">
+                    Custom Style Prompt
+                  </label>
+                  <textarea
+                    value={customStylePrompt}
+                    onChange={(e) => handleCustomStylePromptChange(e.target.value)}
+                    placeholder="e.g., 'A minimalist geometric design', 'An oil painting in renaissance style', 'A cyberpunk neon aesthetic'..."
+                    className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400 resize-vertical min-h-[100px]"
+                    rows={3}
+                    autoComplete="nope"
+                    data-lpignore="true"
+                    data-form-type="other"
+                  />
+                  <p className="text-sm text-gray-400 mt-2">
+                    🎭 Describe the artistic style you want for your memecoin image. Be specific about colors, art style, mood, etc.
+                  </p>
+                </div>
+              )}
             </div>
 
             <div className="text-sm text-gray-400">
