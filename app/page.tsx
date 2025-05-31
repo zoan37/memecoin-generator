@@ -17,12 +17,21 @@ export default function MemecoinGenerator() {
   const [falAiKey, setFalAiKey] = useState('');
   const [showSettings, setShowSettings] = useState(false);
   const [theme, setTheme] = useState('');
+  const [selectedModel, setSelectedModel] = useState('anthropic/claude-3.5-sonnet');
 
-  // Load API keys from localStorage on component mount
+  // Popular OpenRouter models for text generation
+  const availableModels = [
+    { id: 'anthropic/claude-3.5-sonnet', name: 'Claude 3.5 Sonnet', description: 'Best overall quality • 200K context' },
+    { id: 'openai/gpt-4o-mini', name: 'GPT-4o Mini', description: 'Fast and cost-effective • 128K context' },
+    { id: 'google/gemini-2.0-flash-001', name: 'Google Gemini 2.0 Flash', description: 'Google\'s latest model • 1M context' },
+  ];
+
+  // Load saved settings from localStorage on component mount
   useEffect(() => {
     const savedOpenRouterKey = localStorage.getItem('openrouter_api_key');
     const savedFalAiKey = localStorage.getItem('fal_ai_api_key');
     const savedTheme = localStorage.getItem('memecoin_theme');
+    const savedModel = localStorage.getItem('selected_model');
     
     if (savedOpenRouterKey) {
       setOpenRouterKey(savedOpenRouterKey);
@@ -32,6 +41,18 @@ export default function MemecoinGenerator() {
     }
     if (savedTheme) {
       setTheme(savedTheme);
+    }
+    
+    // Check if saved model is valid, if not reset to default
+    if (savedModel) {
+      const validModelIds = availableModels.map(m => m.id);
+      if (validModelIds.includes(savedModel)) {
+        setSelectedModel(savedModel);
+      } else {
+        // Clear invalid model from localStorage and use default
+        localStorage.setItem('selected_model', 'anthropic/claude-3.5-sonnet');
+        setSelectedModel('anthropic/claude-3.5-sonnet');
+      }
     }
   }, []);
 
@@ -65,6 +86,12 @@ export default function MemecoinGenerator() {
     }
   };
 
+  // Save selected model to localStorage when it changes
+  const handleModelChange = (newModel: string) => {
+    setSelectedModel(newModel);
+    localStorage.setItem('selected_model', newModel);
+  };
+
   const generateMemecoin = async () => {
     // Use environment variables as fallback if user hasn't provided keys
     const effectiveOpenRouterKey = openRouterKey || process.env.NEXT_PUBLIC_OPENROUTER_API_KEY;
@@ -86,6 +113,7 @@ export default function MemecoinGenerator() {
         body: JSON.stringify({ 
           openRouterKey: effectiveOpenRouterKey, 
           theme,
+          model: selectedModel,
           usingDefaultKeys: !openRouterKey || !falAiKey
         }),
       });
@@ -183,20 +211,44 @@ export default function MemecoinGenerator() {
 
         {/* Control Panel */}
         <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 mb-8 border border-white/20">
-          <div className="mb-6">
-            <label className="block text-white text-lg font-medium mb-3">
-              Custom Theme (Optional)
-            </label>
-            <input
-              type="text"
-              value={theme}
-              onChange={(e) => handleThemeChange(e.target.value)}
-              placeholder="e.g., 'space cats', 'gaming warriors', 'coffee lovers', 'pirates'..."
-              className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400"
-            />
-            <p className="text-sm text-gray-400 mt-2">
-              💡 Describe a theme to influence the memecoin concept (animals, hobbies, professions, etc.)
-            </p>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            {/* Theme Input */}
+            <div>
+              <label className="block text-white text-lg font-medium mb-3">
+                Custom Theme (Optional)
+              </label>
+              <input
+                type="text"
+                value={theme}
+                onChange={(e) => handleThemeChange(e.target.value)}
+                placeholder="e.g., 'space cats', 'gaming warriors', 'coffee lovers', 'pirates'..."
+                className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400"
+              />
+              <p className="text-sm text-gray-400 mt-2">
+                💡 Describe a theme to influence the memecoin concept
+              </p>
+            </div>
+
+            {/* Model Selection */}
+            <div>
+              <label className="block text-white text-lg font-medium mb-3">
+                AI Model
+              </label>
+              <select
+                value={selectedModel}
+                onChange={(e) => handleModelChange(e.target.value)}
+                className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-blue-400 appearance-none cursor-pointer"
+              >
+                {availableModels.map((model) => (
+                  <option key={model.id} value={model.id} className="bg-gray-800 text-white">
+                    {model.name}
+                  </option>
+                ))}
+              </select>
+              <p className="text-sm text-gray-400 mt-2">
+                🤖 {availableModels.find(m => m.id === selectedModel)?.description}
+              </p>
+            </div>
           </div>
           
           <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">

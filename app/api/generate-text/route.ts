@@ -2,10 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
   try {
-    const { openRouterKey, theme, usingDefaultKeys } = await request.json();
+    const { openRouterKey, theme, model, usingDefaultKeys } = await request.json();
 
     // Use environment variable as fallback
     const effectiveKey = openRouterKey || process.env.NEXT_PUBLIC_OPENROUTER_API_KEY;
+    const selectedModel = model || 'anthropic/claude-3.5-sonnet'; // fallback to Claude 3.5 Sonnet
 
     if (!effectiveKey) {
       return NextResponse.json(
@@ -16,7 +17,7 @@ export async function POST(request: NextRequest) {
 
     // Log when using default keys (for monitoring purposes)
     if (usingDefaultKeys) {
-      console.log('Using default OpenRouter API key');
+      console.log(`Using default OpenRouter API key with model: ${selectedModel}`);
     }
 
     const basePrompt = `Generate a creative and fun memecoin concept. Create:
@@ -58,7 +59,7 @@ Respond in this exact JSON format:
         'X-Title': 'Memecoin Generator',
       },
       body: JSON.stringify({
-        model: 'anthropic/claude-3.5-sonnet',
+        model: selectedModel,
         messages: [
           {
             role: 'user',
