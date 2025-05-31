@@ -50,7 +50,7 @@ export default function MemecoinGenerator() {
         setSelectedModel('anthropic/claude-3.5-sonnet');
       }
     }
-  }, []);
+  }, [availableModels]);
 
   // Save OpenRouter key to localStorage when it changes
   const handleOpenRouterKeyChange = (key: string) => {
@@ -271,7 +271,7 @@ export default function MemecoinGenerator() {
             
             <div className="mb-4 p-4 bg-yellow-500/20 border border-yellow-400/30 rounded-lg">
               <div className="text-sm text-yellow-200">
-                💡 <strong>Don't have API keys?</strong> No problem! The app uses default keys, but they may run out of credits. 
+                💡 <strong>Don&apos;t have API keys?</strong> No problem! The app uses default keys, but they may run out of credits. 
                 For unlimited usage, get your own free keys:
                 <br />
                 • <a href="https://openrouter.ai/" target="_blank" rel="noopener noreferrer" className="underline hover:text-yellow-100">OpenRouter</a> (for text generation)
