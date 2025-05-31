@@ -266,6 +266,49 @@ export default function MemecoinGenerator() {
               💡 Describe a theme to influence the memecoin concept
             </p>
           </div>
+
+          {/* Image Style Selection */}
+          <div className="mb-6">
+            <label className="block text-white text-lg font-medium mb-3">
+              Image Style
+            </label>
+            <select
+              value={imageStyle}
+              onChange={(e) => handleImageStyleChange(e.target.value)}
+              className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-purple-400 appearance-none cursor-pointer"
+            >
+              {imageStyles.map((style) => (
+                <option key={style.id} value={style.id} className="bg-gray-800 text-white">
+                  {style.name}
+                </option>
+              ))}
+            </select>
+            <p className="text-sm text-gray-400 mt-2">
+              🎨 {imageStyles.find(s => s.id === imageStyle)?.description}
+            </p>
+            
+            {/* Custom Style Prompt Input */}
+            {imageStyle === 'custom' && (
+              <div className="mt-4">
+                <label className="block text-white text-sm font-medium mb-2">
+                  Custom Style Prompt
+                </label>
+                <textarea
+                  value={customStylePrompt}
+                  onChange={(e) => handleCustomStylePromptChange(e.target.value)}
+                  placeholder="e.g., 'A minimalist geometric design', 'An oil painting in renaissance style', 'A cyberpunk neon aesthetic'..."
+                  className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400 resize-vertical min-h-[100px]"
+                  rows={3}
+                  autoComplete="nope"
+                  data-lpignore="true"
+                  data-form-type="other"
+                />
+                <p className="text-sm text-gray-400 mt-2">
+                  🎭 Describe the artistic style you want for your memecoin image. Be specific about colors, art style, mood, etc.
+                </p>
+              </div>
+            )}
+          </div>
           
           <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
             <button
@@ -383,49 +426,6 @@ export default function MemecoinGenerator() {
                   </option>
                 ))}
               </select>
-            </div>
-
-            {/* Image Style Selection */}
-            <div className="mb-4">
-              <label className="block text-white text-sm font-medium mb-2">
-                Image Style
-              </label>
-              <select
-                value={imageStyle}
-                onChange={(e) => handleImageStyleChange(e.target.value)}
-                className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-blue-400 appearance-none cursor-pointer"
-              >
-                {imageStyles.map((style) => (
-                  <option key={style.id} value={style.id} className="bg-gray-800 text-white">
-                    {style.name}
-                  </option>
-                ))}
-              </select>
-              <p className="text-sm text-gray-400 mt-2">
-                🎨 {imageStyles.find(s => s.id === imageStyle)?.description}
-              </p>
-              
-              {/* Custom Style Prompt Input */}
-              {imageStyle === 'custom' && (
-                <div className="mt-4">
-                  <label className="block text-white text-sm font-medium mb-2">
-                    Custom Style Prompt
-                  </label>
-                  <textarea
-                    value={customStylePrompt}
-                    onChange={(e) => handleCustomStylePromptChange(e.target.value)}
-                    placeholder="e.g., 'A minimalist geometric design', 'An oil painting in renaissance style', 'A cyberpunk neon aesthetic'..."
-                    className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400 resize-vertical min-h-[100px]"
-                    rows={3}
-                    autoComplete="nope"
-                    data-lpignore="true"
-                    data-form-type="other"
-                  />
-                  <p className="text-sm text-gray-400 mt-2">
-                    🎭 Describe the artistic style you want for your memecoin image. Be specific about colors, art style, mood, etc.
-                  </p>
-                </div>
-              )}
             </div>
 
             <div className="text-sm text-gray-400">
