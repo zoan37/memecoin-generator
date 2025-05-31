@@ -22,19 +22,23 @@ export async function POST(request: NextRequest) {
     const basePrompt = `Generate a creative and fun memecoin concept. Create:
 1. A catchy name (2-4 words max)
 2. A symbol (3-5 letters, all caps)
-3. A fun description (MUST be 255 characters or less, including emojis)
+3. A fun description (MUST be 255 characters or less, including emojis)`;
+
+    const standardConstraints = !theme ? `
 
 The memecoin should be:
 - Funny and internet culture-aware
 - Safe for work
 - Engaging and meme-worthy
-- Crypto/blockchain themed`;
+- Crypto/blockchain themed` : '';
 
     const themePrompt = theme 
-      ? `\n- Themed around: ${theme} (incorporate this theme creatively into the concept)`
+      ? `
+
+The memecoin should be themed around: ${theme} (incorporate this theme creatively into the concept)`
       : '';
 
-    const prompt = `${basePrompt}${themePrompt}
+    const prompt = `${basePrompt}${standardConstraints}${themePrompt}
 
 IMPORTANT: The description must be exactly 255 characters or fewer. Count carefully!
 
