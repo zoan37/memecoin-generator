@@ -69,7 +69,7 @@ npm run dev
 Each memecoin includes:
 
 - **Name**: Catchy 2-4 word memecoin name
-- **Symbol**: 3-5 letter ticker symbol
+- **Symbol**: 3-10 letter ticker symbol
 - **Description**: Fun 50-100 word description
 - **Image**: Custom mascot artwork (1024x1024px)
 
