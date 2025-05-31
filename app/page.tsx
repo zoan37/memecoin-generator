@@ -18,6 +18,7 @@ export default function MemecoinGenerator() {
   const [showSettings, setShowSettings] = useState(false);
   const [theme, setTheme] = useState('');
   const [selectedModel, setSelectedModel] = useState('anthropic/claude-3.5-sonnet');
+  const [imageStyle, setImageStyle] = useState('cartoon');
 
   // Popular OpenRouter models for text generation
   const availableModels = [
@@ -26,17 +27,27 @@ export default function MemecoinGenerator() {
     { id: 'google/gemini-2.0-flash-001', name: 'Google Gemini 2.0 Flash' },
   ];
 
+  // Available image styles
+  const imageStyles = [
+    { id: 'cartoon', name: 'Cartoon Mascot', description: 'Cute cartoon mascot style' },
+    { id: 'photorealistic', name: 'Photorealistic', description: 'Realistic photography style' },
+  ];
+
   // Load saved settings from localStorage on component mount
   useEffect(() => {
     const savedOpenRouterKey = localStorage.getItem('openrouter_api_key');
     const savedFalAiKey = localStorage.getItem('fal_ai_api_key');
     const savedModel = localStorage.getItem('selected_model');
+    const savedImageStyle = localStorage.getItem('image_style');
     
     if (savedOpenRouterKey) {
       setOpenRouterKey(savedOpenRouterKey);
     }
     if (savedFalAiKey) {
       setFalAiKey(savedFalAiKey);
+    }
+    if (savedImageStyle) {
+      setImageStyle(savedImageStyle);
     }
     
     // Check if saved model is valid, if not reset to default
@@ -76,6 +87,12 @@ export default function MemecoinGenerator() {
   const handleModelChange = (newModel: string) => {
     setSelectedModel(newModel);
     localStorage.setItem('selected_model', newModel);
+  };
+
+  // Save image style to localStorage when it changes
+  const handleImageStyleChange = (newStyle: string) => {
+    setImageStyle(newStyle);
+    localStorage.setItem('image_style', newStyle);
   };
 
   const generateMemecoin = async () => {
@@ -118,7 +135,9 @@ export default function MemecoinGenerator() {
         },
         body: JSON.stringify({
           falAiKey: effectiveFalAiKey,
-          prompt: `A cute cartoon mascot for ${textData.name} memecoin: ${textData.description}. Bright colors, fun design, crypto theme.`,
+          prompt: imageStyle === 'cartoon' 
+            ? `A cute cartoon mascot for ${textData.name} memecoin: ${textData.description}. Bright colors, fun design, crypto theme. Professional digital art, high quality, colorful, cartoon style, friendly mascot character, crypto currency theme, clean background, 1024x1024 resolution, perfect for a token logo`
+            : `A photorealistic image for ${textData.name} memecoin: ${textData.description}. Photorealistic, realistic photography, professional studio lighting, high-resolution photograph, detailed textures, real-world lighting, photographic style, ultra-realistic, studio quality, DSLR camera shot, realistic materials and surfaces, no cartoon elements, no digital art style, pure photography`,
           usingDefaultKeys: !openRouterKey || !falAiKey
         }),
       });
@@ -207,6 +226,9 @@ export default function MemecoinGenerator() {
               onChange={(e) => setTheme(e.target.value)}
               placeholder="e.g., 'space cats', 'gaming warriors', 'coffee lovers', 'pirates'..."
               className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400"
+              autoComplete="nope"
+              data-lpignore="true"
+              data-form-type="other"
             />
             <p className="text-sm text-gray-400 mt-2">
               💡 Describe a theme to influence the memecoin concept
@@ -291,6 +313,9 @@ export default function MemecoinGenerator() {
                   onChange={(e) => handleOpenRouterKeyChange(e.target.value)}
                   placeholder="Enter your OpenRouter API key (optional)"
                   className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  autoComplete="new-password"
+                  data-lpignore="true"
+                  data-form-type="other"
                 />
               </div>
               <div>
@@ -303,6 +328,9 @@ export default function MemecoinGenerator() {
                   onChange={(e) => handleFalAiKeyChange(e.target.value)}
                   placeholder="Enter your Fal AI API key (optional)"
                   className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  autoComplete="new-password"
+                  data-lpignore="true"
+                  data-form-type="other"
                 />
               </div>
             </div>
@@ -323,6 +351,27 @@ export default function MemecoinGenerator() {
                   </option>
                 ))}
               </select>
+            </div>
+
+            {/* Image Style Selection */}
+            <div className="mb-4">
+              <label className="block text-white text-sm font-medium mb-2">
+                Image Style
+              </label>
+              <select
+                value={imageStyle}
+                onChange={(e) => handleImageStyleChange(e.target.value)}
+                className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-blue-400 appearance-none cursor-pointer"
+              >
+                {imageStyles.map((style) => (
+                  <option key={style.id} value={style.id} className="bg-gray-800 text-white">
+                    {style.name}
+                  </option>
+                ))}
+              </select>
+              <p className="text-sm text-gray-400 mt-2">
+                🎨 {imageStyles.find(s => s.id === imageStyle)?.description}
+              </p>
             </div>
 
             <div className="text-sm text-gray-400">

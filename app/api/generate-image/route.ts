@@ -19,10 +19,7 @@ export async function POST(request: NextRequest) {
       console.log('Using default Fal AI API key');
     }
 
-    // Enhanced prompt for better memecoin mascot generation
-    const enhancedPrompt = `${prompt} Professional digital art, high quality, colorful, cartoon style, friendly mascot character, crypto currency theme, clean background, 1024x1024 resolution, perfect for a token logo`;
-
-    console.log('Generating image with prompt:', enhancedPrompt);
+    console.log('Generating image with prompt:', prompt);
 
     // Using Fal AI's FLUX model for image generation
     const response = await fetch('https://fal.run/fal-ai/flux/schnell', {
@@ -32,7 +29,7 @@ export async function POST(request: NextRequest) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        prompt: enhancedPrompt,
+        prompt: prompt,
         image_size: 'square_hd',
         num_inference_steps: 4,
         num_images: 1,
