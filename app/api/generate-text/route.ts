@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
   try {
-    const { openRouterKey, theme, model, usingDefaultKeys } = await request.json();
+    const { openRouterKey, theme, writingStyle, model, usingDefaultKeys } = await request.json();
 
     // Use environment variable as fallback
     const effectiveKey = openRouterKey || process.env.NEXT_PUBLIC_OPENROUTER_API_KEY;
@@ -40,7 +40,13 @@ The memecoin should be:
 The memecoin should be themed around: ${theme} (incorporate this theme creatively into the concept)`
       : '';
 
-    const prompt = `${basePrompt}${standardConstraints}${themePrompt}
+    const stylePrompt = writingStyle 
+      ? `
+
+WRITING TONE/STYLE: Write the memecoin name, description, and overall concept with a ${writingStyle} tone and style. Make sure the personality and voice matches this style throughout.`
+      : '';
+
+    const prompt = `${basePrompt}${standardConstraints}${themePrompt}${stylePrompt}
 
 IMPORTANT: The description must be exactly 255 characters or fewer. Count carefully!
 IMPORTANT: The visual description will be used in a Fal AI prompt, so focus ONLY on what should be in the image (objects, colors, composition, mood) - do NOT include artistic style terms like "cartoon", "photorealistic", "oil painting", etc. The image represents the memecoin's theme/meme but doesn't need to show actual coins or tokens.

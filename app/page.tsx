@@ -21,6 +21,7 @@ export default function MemecoinGenerator() {
   const [selectedModel, setSelectedModel] = useState('anthropic/claude-3.5-sonnet');
   const [imageStyle, setImageStyle] = useState('cartoon');
   const [customStylePrompt, setCustomStylePrompt] = useState('');
+  const [writingStyle, setWritingStyle] = useState('');
 
   // Popular OpenRouter models for text generation
   const availableModels = [
@@ -43,6 +44,7 @@ export default function MemecoinGenerator() {
     const savedModel = localStorage.getItem('selected_model');
     const savedImageStyle = localStorage.getItem('image_style');
     const savedCustomStylePrompt = localStorage.getItem('custom_style_prompt');
+    const savedWritingStyle = localStorage.getItem('writing_style');
     
     if (savedOpenRouterKey) {
       setOpenRouterKey(savedOpenRouterKey);
@@ -55,6 +57,9 @@ export default function MemecoinGenerator() {
     }
     if (savedCustomStylePrompt) {
       setCustomStylePrompt(savedCustomStylePrompt);
+    }
+    if (savedWritingStyle) {
+      setWritingStyle(savedWritingStyle);
     }
     
     // Check if saved model is valid, if not reset to default
@@ -112,6 +117,16 @@ export default function MemecoinGenerator() {
     }
   };
 
+  // Save writing style to localStorage when it changes
+  const handleWritingStyleChange = (newStyle: string) => {
+    setWritingStyle(newStyle);
+    if (newStyle) {
+      localStorage.setItem('writing_style', newStyle);
+    } else {
+      localStorage.removeItem('writing_style');
+    }
+  };
+
   const generateMemecoin = async () => {
     // Use environment variables as fallback if user hasn't provided keys
     const effectiveOpenRouterKey = openRouterKey || process.env.NEXT_PUBLIC_OPENROUTER_API_KEY;
@@ -139,6 +154,7 @@ export default function MemecoinGenerator() {
         body: JSON.stringify({ 
           openRouterKey: effectiveOpenRouterKey, 
           theme,
+          writingStyle,
           model: selectedModel,
           usingDefaultKeys: !openRouterKey || !falAiKey
         }),
@@ -264,6 +280,26 @@ export default function MemecoinGenerator() {
             />
             <p className="text-sm text-gray-400 mt-2">
               💡 Describe a theme to influence the memecoin concept
+            </p>
+          </div>
+
+          {/* Writing Style/Tone Input */}
+          <div className="mb-6">
+            <label className="block text-white text-lg font-medium mb-3">
+              Writing Style (Optional)
+            </label>
+            <input
+              type="text"
+              value={writingStyle}
+              onChange={(e) => handleWritingStyleChange(e.target.value)}
+              placeholder="e.g., 'dark and edgy', 'sarcastic', 'serious and professional', 'playful', 'mysterious'..."
+              className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400"
+              autoComplete="nope"
+              data-lpignore="true"
+              data-form-type="other"
+            />
+            <p className="text-sm text-gray-400 mt-2">
+              🎭 Specify the tone and writing style for your memecoin's personality
             </p>
           </div>
 
