@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Coins, Sparkles, Download, Settings, RefreshCw } from 'lucide-react';
+import Image from 'next/image';
 
 interface MemecoinData {
   name: string;
@@ -24,11 +25,11 @@ export default function MemecoinGenerator() {
   const [writingStyle, setWritingStyle] = useState('');
 
   // Popular OpenRouter models for text generation
-  const availableModels = [
+  const availableModels = useMemo(() => [
     { id: 'anthropic/claude-3.5-sonnet', name: 'Claude 3.5 Sonnet' },
     { id: 'openai/gpt-4o-mini', name: 'GPT-4o Mini' },
     { id: 'google/gemini-2.0-flash-001', name: 'Google Gemini 2.0 Flash' },
-  ];
+  ], []);
 
   // Available image styles
   const imageStyles = [
@@ -477,9 +478,11 @@ export default function MemecoinGenerator() {
               {/* Image */}
               <div className="space-y-4">
                 <div className="aspect-square bg-white/5 rounded-2xl overflow-hidden border border-white/20">
-                  <img
+                  <Image
                     src={memecoin.imageUrl}
                     alt={memecoin.name}
+                    width={512}
+                    height={512}
                     className="w-full h-full object-cover"
                   />
                 </div>
