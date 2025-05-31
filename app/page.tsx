@@ -183,7 +183,7 @@ export default function MemecoinGenerator() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 p-4">
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 p-4 pb-16">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
@@ -390,11 +390,6 @@ export default function MemecoinGenerator() {
             </div>
           </div>
         )}
-
-        {/* Footer */}
-        <div className="text-center mt-12 text-gray-400">
-          <p>Powered by OpenRouter AI & Fal AI • Made with ❤️ for the meme economy</p>
-        </div>
       </div>
     </div>
   );
