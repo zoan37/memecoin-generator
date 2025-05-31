@@ -116,12 +116,11 @@ Respond in this exact JSON format:
         });
       }
 
-      // Ultimate fallback
-      return NextResponse.json({
-        name: "MoonDoge",
-        symbol: "MDOGE",
-        description: "A doge that went to the moon and came back with diamond paws! This memecoin represents the spirit of HODLing through thick and thin, with a cute space-traveling doge as our mascot. 🚀🌙",
-      });
+      // Failed to parse response
+      return NextResponse.json(
+        { error: 'Failed to parse LLM response as valid JSON' },
+        { status: 500 }
+      );
     }
   } catch (error) {
     console.error('Error generating text:', error);
