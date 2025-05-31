@@ -2,13 +2,21 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
   try {
-    const { openRouterKey, theme } = await request.json();
+    const { openRouterKey, theme, usingDefaultKeys } = await request.json();
 
-    if (!openRouterKey) {
+    // Use environment variable as fallback
+    const effectiveKey = openRouterKey || process.env.NEXT_PUBLIC_OPENROUTER_API_KEY;
+
+    if (!effectiveKey) {
       return NextResponse.json(
         { error: 'OpenRouter API key is required' },
         { status: 400 }
       );
+    }
+
+    // Log when using default keys (for monitoring purposes)
+    if (usingDefaultKeys) {
+      console.log('Using default OpenRouter API key');
     }
 
     const basePrompt = `Generate a creative and fun memecoin concept. Create:
@@ -40,7 +48,7 @@ Respond in this exact JSON format:
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${openRouterKey}`,
+        'Authorization': `Bearer ${effectiveKey}`,
         'Content-Type': 'application/json',
         'HTTP-Referer': 'https://memecoin-generator.vercel.app',
         'X-Title': 'Memecoin Generator',

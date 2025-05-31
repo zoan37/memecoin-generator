@@ -2,13 +2,21 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
   try {
-    const { falAiKey, prompt } = await request.json();
+    const { falAiKey, prompt, usingDefaultKeys } = await request.json();
 
-    if (!falAiKey || !prompt) {
+    // Use environment variable as fallback
+    const effectiveKey = falAiKey || process.env.NEXT_PUBLIC_FAL_API_KEY;
+
+    if (!effectiveKey || !prompt) {
       return NextResponse.json(
         { error: 'Fal AI key and prompt are required' },
         { status: 400 }
       );
+    }
+
+    // Log when using default keys (for monitoring purposes)
+    if (usingDefaultKeys) {
+      console.log('Using default Fal AI API key');
     }
 
     // Enhanced prompt for better memecoin mascot generation
@@ -20,7 +28,7 @@ export async function POST(request: NextRequest) {
     const response = await fetch('https://fal.run/fal-ai/flux/schnell', {
       method: 'POST',
       headers: {
-        'Authorization': `Key ${falAiKey}`,
+        'Authorization': `Key ${effectiveKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({

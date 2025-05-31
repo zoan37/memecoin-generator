@@ -66,8 +66,12 @@ export default function MemecoinGenerator() {
   };
 
   const generateMemecoin = async () => {
-    if (!openRouterKey || !falAiKey) {
-      alert('Please set your API keys in settings first!');
+    // Use environment variables as fallback if user hasn't provided keys
+    const effectiveOpenRouterKey = openRouterKey || process.env.NEXT_PUBLIC_OPENROUTER_API_KEY;
+    const effectiveFalAiKey = falAiKey || process.env.NEXT_PUBLIC_FAL_API_KEY;
+
+    if (!effectiveOpenRouterKey || !effectiveFalAiKey) {
+      alert('API keys are required! Please set your keys in settings or contact the developer.');
       return;
     }
 
@@ -79,7 +83,11 @@ export default function MemecoinGenerator() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ openRouterKey, theme }),
+        body: JSON.stringify({ 
+          openRouterKey: effectiveOpenRouterKey, 
+          theme,
+          usingDefaultKeys: !openRouterKey || !falAiKey
+        }),
       });
 
       if (!textResponse.ok) {
@@ -95,8 +103,9 @@ export default function MemecoinGenerator() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          falAiKey,
+          falAiKey: effectiveFalAiKey,
           prompt: `A cute cartoon mascot for ${textData.name} memecoin: ${textData.description}. Bright colors, fun design, crypto theme.`,
+          usingDefaultKeys: !openRouterKey || !falAiKey
         }),
       });
 
@@ -114,7 +123,7 @@ export default function MemecoinGenerator() {
       });
     } catch (error) {
       console.error('Error generating memecoin:', error);
-      alert('Failed to generate memecoin. Please try again.');
+      alert('Failed to generate memecoin. Please try again or check your API keys in settings.');
     } finally {
       setIsGenerating(false);
     }
@@ -217,6 +226,25 @@ export default function MemecoinGenerator() {
               )}
             </button>
           </div>
+
+          {/* API Key Status Info */}
+          <div className="mt-4 p-3 bg-blue-500/20 border border-blue-400/30 rounded-lg">
+            <div className="text-sm text-blue-200">
+              {openRouterKey && falAiKey ? (
+                <span>✅ Using your personal API keys</span>
+              ) : (
+                <span>
+                  🔑 Using default API keys (may run out of credits) • 
+                  <button 
+                    onClick={() => setShowSettings(true)}
+                    className="underline hover:text-blue-100 ml-1"
+                  >
+                    Add your own keys
+                  </button>
+                </span>
+              )}
+            </div>
+          </div>
         </div>
 
         {/* Settings Panel */}
@@ -226,28 +254,40 @@ export default function MemecoinGenerator() {
               <Settings className="w-6 h-6" />
               API Configuration
             </h2>
+            
+            <div className="mb-4 p-4 bg-yellow-500/20 border border-yellow-400/30 rounded-lg">
+              <div className="text-sm text-yellow-200">
+                💡 <strong>Don't have API keys?</strong> No problem! The app uses default keys, but they may run out of credits. 
+                For unlimited usage, get your own free keys:
+                <br />
+                • <a href="https://openrouter.ai/" target="_blank" rel="noopener noreferrer" className="underline hover:text-yellow-100">OpenRouter</a> (for text generation)
+                <br />
+                • <a href="https://fal.ai/" target="_blank" rel="noopener noreferrer" className="underline hover:text-yellow-100">Fal AI</a> (for image generation)
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-white text-sm font-medium mb-2">
-                  OpenRouter API Key
+                  OpenRouter API Key (Optional)
                 </label>
                 <input
                   type="password"
                   value={openRouterKey}
                   onChange={(e) => handleOpenRouterKeyChange(e.target.value)}
-                  placeholder="Enter your OpenRouter API key"
+                  placeholder="Enter your OpenRouter API key (optional)"
                   className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
                 />
               </div>
               <div>
                 <label className="block text-white text-sm font-medium mb-2">
-                  Fal AI API Key
+                  Fal AI API Key (Optional)
                 </label>
                 <input
                   type="password"
                   value={falAiKey}
                   onChange={(e) => handleFalAiKeyChange(e.target.value)}
-                  placeholder="Enter your Fal AI API key"
+                  placeholder="Enter your Fal AI API key (optional)"
                   className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
                 />
               </div>
