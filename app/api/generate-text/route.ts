@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
     const prompt = `Generate a creative and fun memecoin concept. Create:
 1. A catchy name (2-4 words max)
 2. A symbol (3-5 letters, all caps)
-3. A fun description (50-100 words)
+3. A fun description (MUST be 255 characters or less, including emojis)
 
 The memecoin should be:
 - Funny and internet culture-aware
@@ -22,11 +22,13 @@ The memecoin should be:
 - Engaging and meme-worthy
 - Crypto/blockchain themed
 
+IMPORTANT: The description must be exactly 255 characters or fewer. Count carefully!
+
 Respond in this exact JSON format:
 {
   "name": "coin name here",
   "symbol": "SYMBOL",
-  "description": "fun description here..."
+  "description": "fun description here (255 chars max)..."
 }`;
 
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
@@ -99,7 +101,7 @@ Respond in this exact JSON format:
       return NextResponse.json({
         name: "MoonDoge",
         symbol: "MDOGE",
-        description: "A doge that went to the moon and came back with diamond paws! This memecoin represents the spirit of HODLing through thick and thin, with a cute space-traveling doge as our mascot.",
+        description: "A doge that went to the moon and came back with diamond paws! This memecoin represents the spirit of HODLing through thick and thin, with a cute space-traveling doge as our mascot. 🚀🌙",
       });
     }
   } catch (error) {
