@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Coins, Sparkles, Download, Settings, RefreshCw } from 'lucide-react';
 
 interface MemecoinData {
@@ -16,6 +16,39 @@ export default function MemecoinGenerator() {
   const [openRouterKey, setOpenRouterKey] = useState('');
   const [falAiKey, setFalAiKey] = useState('');
   const [showSettings, setShowSettings] = useState(false);
+
+  // Load API keys from localStorage on component mount
+  useEffect(() => {
+    const savedOpenRouterKey = localStorage.getItem('openrouter_api_key');
+    const savedFalAiKey = localStorage.getItem('fal_ai_api_key');
+    
+    if (savedOpenRouterKey) {
+      setOpenRouterKey(savedOpenRouterKey);
+    }
+    if (savedFalAiKey) {
+      setFalAiKey(savedFalAiKey);
+    }
+  }, []);
+
+  // Save OpenRouter key to localStorage when it changes
+  const handleOpenRouterKeyChange = (key: string) => {
+    setOpenRouterKey(key);
+    if (key) {
+      localStorage.setItem('openrouter_api_key', key);
+    } else {
+      localStorage.removeItem('openrouter_api_key');
+    }
+  };
+
+  // Save Fal AI key to localStorage when it changes
+  const handleFalAiKeyChange = (key: string) => {
+    setFalAiKey(key);
+    if (key) {
+      localStorage.setItem('fal_ai_api_key', key);
+    } else {
+      localStorage.removeItem('fal_ai_api_key');
+    }
+  };
 
   const generateMemecoin = async () => {
     if (!openRouterKey || !falAiKey) {
@@ -109,7 +142,7 @@ export default function MemecoinGenerator() {
                 <input
                   type="password"
                   value={openRouterKey}
-                  onChange={(e) => setOpenRouterKey(e.target.value)}
+                  onChange={(e) => handleOpenRouterKeyChange(e.target.value)}
                   placeholder="Enter your OpenRouter API key"
                   className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
                 />
@@ -121,11 +154,14 @@ export default function MemecoinGenerator() {
                 <input
                   type="password"
                   value={falAiKey}
-                  onChange={(e) => setFalAiKey(e.target.value)}
+                  onChange={(e) => handleFalAiKeyChange(e.target.value)}
                   placeholder="Enter your Fal AI API key"
                   className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
                 />
               </div>
+            </div>
+            <div className="mt-4 text-sm text-gray-400">
+              💾 API keys are automatically saved in your browser and will persist when you refresh the page.
             </div>
           </div>
         )}
