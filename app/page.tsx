@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { Coins, Sparkles, Download, Settings, RefreshCw } from 'lucide-react';
-import Image from 'next/image';
 
 interface MemecoinData {
   name: string;
@@ -300,7 +299,7 @@ export default function MemecoinGenerator() {
               data-form-type="other"
             />
             <p className="text-sm text-gray-400 mt-2">
-              🎭 Specify the tone and writing style for your memecoin's personality
+              🎭 Specify the tone and writing style for your memecoin&apos;s personality
             </p>
           </div>
 
@@ -478,11 +477,9 @@ export default function MemecoinGenerator() {
               {/* Image */}
               <div className="space-y-4">
                 <div className="aspect-square bg-white/5 rounded-2xl overflow-hidden border border-white/20">
-                  <Image
+                  <img
                     src={memecoin.imageUrl}
                     alt={memecoin.name}
-                    width={512}
-                    height={512}
                     className="w-full h-full object-cover"
                   />
                 </div>
