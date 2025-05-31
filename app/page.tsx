@@ -16,17 +16,22 @@ export default function MemecoinGenerator() {
   const [openRouterKey, setOpenRouterKey] = useState('');
   const [falAiKey, setFalAiKey] = useState('');
   const [showSettings, setShowSettings] = useState(false);
+  const [theme, setTheme] = useState('');
 
   // Load API keys from localStorage on component mount
   useEffect(() => {
     const savedOpenRouterKey = localStorage.getItem('openrouter_api_key');
     const savedFalAiKey = localStorage.getItem('fal_ai_api_key');
+    const savedTheme = localStorage.getItem('memecoin_theme');
     
     if (savedOpenRouterKey) {
       setOpenRouterKey(savedOpenRouterKey);
     }
     if (savedFalAiKey) {
       setFalAiKey(savedFalAiKey);
+    }
+    if (savedTheme) {
+      setTheme(savedTheme);
     }
   }, []);
 
@@ -50,6 +55,16 @@ export default function MemecoinGenerator() {
     }
   };
 
+  // Save theme to localStorage when it changes
+  const handleThemeChange = (newTheme: string) => {
+    setTheme(newTheme);
+    if (newTheme) {
+      localStorage.setItem('memecoin_theme', newTheme);
+    } else {
+      localStorage.removeItem('memecoin_theme');
+    }
+  };
+
   const generateMemecoin = async () => {
     if (!openRouterKey || !falAiKey) {
       alert('Please set your API keys in settings first!');
@@ -64,7 +79,7 @@ export default function MemecoinGenerator() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ openRouterKey }),
+        body: JSON.stringify({ openRouterKey, theme }),
       });
 
       if (!textResponse.ok) {
@@ -105,12 +120,42 @@ export default function MemecoinGenerator() {
     }
   };
 
-  const downloadImage = () => {
-    if (memecoin?.imageUrl) {
+  const downloadImage = async () => {
+    if (!memecoin?.imageUrl) return;
+
+    try {
+      // Fetch the image as a blob to ensure proper download
+      const response = await fetch(memecoin.imageUrl);
+      const blob = await response.blob();
+      
+      // Create a blob URL
+      const blobUrl = window.URL.createObjectURL(blob);
+      
+      // Create download link
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = `${memecoin.name.replace(/\s+/g, '_')}_memecoin.png`;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      
+      // Append to body, click, then remove
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // Clean up the blob URL
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      console.error('Error downloading image:', error);
+      // Fallback: try direct link download
       const link = document.createElement('a');
       link.href = memecoin.imageUrl;
       link.download = `${memecoin.name.replace(/\s+/g, '_')}_memecoin.png`;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      document.body.appendChild(link);
       link.click();
+      document.body.removeChild(link);
     }
   };
 
@@ -125,6 +170,53 @@ export default function MemecoinGenerator() {
             <Sparkles className="w-12 h-12 text-pink-400" />
           </div>
           <p className="text-xl text-gray-300">Create the next viral memecoin with AI-powered creativity!</p>
+        </div>
+
+        {/* Control Panel */}
+        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 mb-8 border border-white/20">
+          <div className="mb-6">
+            <label className="block text-white text-lg font-medium mb-3">
+              Custom Theme (Optional)
+            </label>
+            <input
+              type="text"
+              value={theme}
+              onChange={(e) => handleThemeChange(e.target.value)}
+              placeholder="e.g., 'space cats', 'gaming warriors', 'coffee lovers', 'pirates'..."
+              className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400"
+            />
+            <p className="text-sm text-gray-400 mt-2">
+              💡 Describe a theme to influence the memecoin concept (animals, hobbies, professions, etc.)
+            </p>
+          </div>
+          
+          <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
+            <button
+              onClick={() => setShowSettings(!showSettings)}
+              className="px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+            >
+              <Settings className="w-5 h-5" />
+              {showSettings ? 'Hide Settings' : 'Show Settings'}
+            </button>
+            
+            <button
+              onClick={generateMemecoin}
+              disabled={isGenerating}
+              className="px-8 py-4 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg font-bold text-lg transition-all transform hover:scale-105 flex items-center gap-2"
+            >
+              {isGenerating ? (
+                <>
+                  <RefreshCw className="w-6 h-6 animate-spin" />
+                  Generating Magic...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-6 h-6" />
+                  Generate Memecoin
+                </>
+              )}
+            </button>
+          </div>
         </div>
 
         {/* Settings Panel */}
@@ -161,41 +253,10 @@ export default function MemecoinGenerator() {
               </div>
             </div>
             <div className="mt-4 text-sm text-gray-400">
-              💾 API keys are automatically saved in your browser and will persist when you refresh the page.
+              💾 Settings are automatically saved and will persist when you refresh the page.
             </div>
           </div>
         )}
-
-        {/* Control Panel */}
-        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 mb-8 border border-white/20">
-          <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
-            <button
-              onClick={() => setShowSettings(!showSettings)}
-              className="px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
-            >
-              <Settings className="w-5 h-5" />
-              {showSettings ? 'Hide Settings' : 'Show Settings'}
-            </button>
-            
-            <button
-              onClick={generateMemecoin}
-              disabled={isGenerating}
-              className="px-8 py-4 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg font-bold text-lg transition-all transform hover:scale-105 flex items-center gap-2"
-            >
-              {isGenerating ? (
-                <>
-                  <RefreshCw className="w-6 h-6 animate-spin" />
-                  Generating Magic...
-                </>
-              ) : (
-                <>
-                  <Sparkles className="w-6 h-6" />
-                  Generate Memecoin
-                </>
-              )}
-            </button>
-          </div>
-        </div>
 
         {/* Generated Memecoin Display */}
         {memecoin && (

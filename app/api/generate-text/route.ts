@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
   try {
-    const { openRouterKey } = await request.json();
+    const { openRouterKey, theme } = await request.json();
 
     if (!openRouterKey) {
       return NextResponse.json(
@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const prompt = `Generate a creative and fun memecoin concept. Create:
+    const basePrompt = `Generate a creative and fun memecoin concept. Create:
 1. A catchy name (2-4 words max)
 2. A symbol (3-5 letters, all caps)
 3. A fun description (MUST be 255 characters or less, including emojis)
@@ -20,7 +20,13 @@ The memecoin should be:
 - Funny and internet culture-aware
 - Safe for work
 - Engaging and meme-worthy
-- Crypto/blockchain themed
+- Crypto/blockchain themed`;
+
+    const themePrompt = theme 
+      ? `\n- Themed around: ${theme} (incorporate this theme creatively into the concept)`
+      : '';
+
+    const prompt = `${basePrompt}${themePrompt}
 
 IMPORTANT: The description must be exactly 255 characters or fewer. Count carefully!
 
